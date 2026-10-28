@@ -1,0 +1,20 @@
+# Java build output
+*.class
+build/
+out/
+target/
+
+# Runtime logs
+logs/
+*.log
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Operating system metadata
+.DS_Store
+Thumbs.db
