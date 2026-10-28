@@ -25,7 +25,8 @@ command -v sudo >/dev/null || { printf 'sudo is required.\n' >&2; exit 1; }
 sudo apt-get -o DPkg::Lock::Timeout=120 update
 sudo env DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=120 \
     install --yes --no-install-recommends \
-    ca-certificates curl git openjdk-11-jdk-headless tar gzip unzip xz-utils
+    ca-certificates curl git openjdk-11-jdk-headless tar gzip unzip xz-utils \
+    bubblewrap ripgrep
 
 # Use the official native installer: Codex does not need Node.js this way.
 # Pin the first installation; preserve any existing functional Codex install.
