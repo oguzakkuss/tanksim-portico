@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objectModel xmlns="http://standards.ieee.org/IEEE1516-2010"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://standards.ieee.org/IEEE1516-2010 http://standards.ieee.org/downloads/1516/1516.2-2010/IEEE1516-DIF-2010.xsd">
+
+    <modelIdentification>
+        <name>TankSim</name>
+        <type>FOM</type>
+        <version>1.0</version>
+        <modificationDate>2026-10-29</modificationDate>
+        <securityClassification>Unclassified</securityClassification>
+        <purpose>Shared state for the tank simulation.</purpose>
+        <applicationDomain>Tank simulation</applicationDomain>
+        <description>Simulation management extension to the RPR FOM.</description>
+    </modelIdentification>
+
+    <objects>
+        <objectClass>
+            <name>HLAobjectRoot</name>
+
+            <objectClass>
+                <name>SimulationState</name>
+                <sharing>PublishSubscribe</sharing>
+                <semantics>One instance per simulation run, owned by TankFederate.</semantics>
+
+                <attribute>
+                    <name>RunId</name>
+                    <dataType>HLAunicodeString</dataType>
+                    <updateType>Static</updateType>
+                    <updateCondition>On initialization or request</updateCondition>
+                    <ownership>NoTransfer</ownership>
+                    <sharing>PublishSubscribe</sharing>
+                    <transportation>HLAreliable</transportation>
+                    <order>Receive</order>
+                    <semantics>Unique identifier of this simulation run.</semantics>
+                </attribute>
+
+                <attribute>
+                    <name>SimTime</name>
+                    <dataType>HLAfloat64BE</dataType>
+                    <updateType>Periodic</updateType>
+                    <updateCondition>Each simulation step or on request</updateCondition>
+                    <ownership>NoTransfer</ownership>
+                    <sharing>PublishSubscribe</sharing>
+                    <transportation>HLAreliable</transportation>
+                    <order>Receive</order>
+                    <semantics>Simulation time in seconds.</semantics>
+                </attribute>
+
+                <attribute>
+                    <name>Phase</name>
+                    <dataType>TankSimPhaseEnum32</dataType>
+                    <updateType>Conditional</updateType>
+                    <updateCondition>On change or request</updateCondition>
+                    <ownership>NoTransfer</ownership>
+                    <sharing>PublishSubscribe</sharing>
+                    <transportation>HLAreliable</transportation>
+                    <order>Receive</order>
+                    <semantics>Current execution phase.</semantics>
+                </attribute>
+
+                <attribute>
+                    <name>MapWidth</name>
+                    <dataType>HLAfloat64BE</dataType>
+                    <updateType>Static</updateType>
+                    <updateCondition>On initialization or request</updateCondition>
+                    <ownership>NoTransfer</ownership>
+                    <sharing>PublishSubscribe</sharing>
+                    <transportation>HLAreliable</transportation>
+                    <order>Receive</order>
+                    <semantics>Local map width in meters.</semantics>
+                </attribute>
+
+                <attribute>
+                    <name>MapHeight</name>
+                    <dataType>HLAfloat64BE</dataType>
+                    <updateType>Static</updateType>
+                    <updateCondition>On initialization or request</updateCondition>
+                    <ownership>NoTransfer</ownership>
+                    <sharing>PublishSubscribe</sharing>
+                    <transportation>HLAreliable</transportation>
+                    <order>Receive</order>
+                    <semantics>Local map height in meters.</semantics>
+                </attribute>
+
+                <attribute>
+                    <name>StepSeconds</name>
+                    <dataType>HLAfloat64BE</dataType>
+                    <updateType>Static</updateType>
+                    <updateCondition>On initialization or request</updateCondition>
+                    <ownership>NoTransfer</ownership>
+                    <sharing>PublishSubscribe</sharing>
+                    <transportation>HLAreliable</transportation>
+                    <order>Receive</order>
+                    <semantics>Fixed physics step in seconds.</semantics>
+                </attribute>
+
+                <attribute>
+                    <name>TargetEntityId</name>
+                    <dataType>EntityIdentifierStruct</dataType>
+                    <updateType>Static</updateType>
+                    <updateCondition>On initialization or request</updateCondition>
+                    <ownership>NoTransfer</ownership>
+                    <sharing>PublishSubscribe</sharing>
+                    <transportation>HLAreliable</transportation>
+                    <order>Receive</order>
+                    <semantics>Entity identifier of the target tank.</semantics>
+                </attribute>
+
+                <attribute>
+                    <name>PlayerEntityId</name>
+                    <dataType>EntityIdentifierStruct</dataType>
+                    <updateType>Static</updateType>
+                    <updateCondition>On initialization or request</updateCondition>
+                    <ownership>NoTransfer</ownership>
+                    <sharing>PublishSubscribe</sharing>
+                    <transportation>HLAreliable</transportation>
+                    <order>Receive</order>
+                    <semantics>Entity identifier of the player tank.</semantics>
+                </attribute>
+            </objectClass>
+        </objectClass>
+    </objects>
+
+    <interactions>
+        <interactionClass>
+            <name>HLAinteractionRoot</name>
+            <interactionClass>
+                <name>FederateReady</name>
+                <sharing>PublishSubscribe</sharing>
+                <transportation>HLAreliable</transportation>
+                <order>Receive</order>
+                <semantics>A participant is ready for a particular simulation run.</semantics>
+                <parameter>
+                    <name>Payload</name>
+                    <dataType>HLAopaqueData</dataType>
+                    <semantics>TankSim binary protocol version 1, Ready body; see MessageCodec.java.</semantics>
+                </parameter>
+            </interactionClass>
+            <interactionClass>
+                <name>ControlCommand</name>
+                <sharing>PublishSubscribe</sharing>
+                <transportation>HLAreliable</transportation>
+                <order>Receive</order>
+                <semantics>Display requests steering, movement stop, fire or shutdown.</semantics>
+                <parameter>
+                    <name>Payload</name>
+                    <dataType>HLAopaqueData</dataType>
+                    <semantics>TankSim binary protocol version 1, Control body; see MessageCodec.java.</semantics>
+                </parameter>
+            </interactionClass>
+            <interactionClass>
+                <name>ShotSnapshot</name>
+                <sharing>PublishSubscribe</sharing>
+                <transportation>HLAreliable</transportation>
+                <order>Receive</order>
+                <semantics>Same-time authoritative target and projectile state for a prediction job.</semantics>
+                <parameter>
+                    <name>Payload</name>
+                    <dataType>HLAopaqueData</dataType>
+                    <semantics>TankSim binary protocol version 1, Shot body; see MessageCodec.java.</semantics>
+                </parameter>
+            </interactionClass>
+            <interactionClass>
+                <name>PredictedTrajectories</name>
+                <sharing>PublishSubscribe</sharing>
+                <transportation>HLAreliable</transportation>
+                <order>Receive</order>
+                <semantics>Piecewise target motion and straight projectile motion through exit time.</semantics>
+                <parameter>
+                    <name>Payload</name>
+                    <dataType>HLAopaqueData</dataType>
+                    <semantics>TankSim binary protocol version 1, Trajectories body; see MessageCodec.java.</semantics>
+                </parameter>
+            </interactionClass>
+            <interactionClass>
+                <name>CollisionResult</name>
+                <sharing>PublishSubscribe</sharing>
+                <transportation>HLAreliable</transportation>
+                <order>Receive</order>
+                <semantics>Predicted first contact or exit time, or calculation failure. Not an applied hit.</semantics>
+                <parameter>
+                    <name>Payload</name>
+                    <dataType>HLAopaqueData</dataType>
+                    <semantics>TankSim binary protocol version 1, Result body; see MessageCodec.java.</semantics>
+                </parameter>
+            </interactionClass>
+        </interactionClass>
+    </interactions>
+
+    <dataTypes>
+        <enumeratedDataTypes>
+            <enumeratedData>
+                <name>TankSimPhaseEnum32</name>
+                <representation>HLAinteger32BE</representation>
+                <semantics>Simulation execution phase.</semantics>
+
+                <enumerator>
+                    <name>STARTING</name>
+                    <value>0</value>
+                </enumerator>
+                <enumerator>
+                    <name>RUNNING</name>
+                    <value>1</value>
+                </enumerator>
+                <enumerator>
+                    <name>WAITING_FOR_PREDICTION</name>
+                    <value>2</value>
+                </enumerator>
+                <enumerator>
+                    <name>STOPPING</name>
+                    <value>3</value>
+                </enumerator>
+                <enumerator>
+                    <name>ERROR</name>
+                    <value>4</value>
+                </enumerator>
+            </enumeratedData>
+        </enumeratedDataTypes>
+    </dataTypes>
+</objectModel>

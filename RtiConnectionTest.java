@@ -58,16 +58,18 @@ public class RtiConnectionTest {
         rti.updateAttributeValues(tankInstance, values, new byte[0]);
 
         System.out.println("Spatial gonderildi: " + spatialBytes.length + "byte");
-        rti.resignFederationExecution(ResignAction.DELETE_OBJECTS);
-        
         try {
-            rti.destroyFederationExecution(federationName);
-        } catch (FederationExecutionDoesNotExist e) {
-            System.out.println("Federasyon yok");
+            rti.resignFederationExecution(ResignAction.DELETE_OBJECTS);
+
+            try {
+                rti.destroyFederationExecution(federationName);
+            } catch (FederatesCurrentlyJoined e) {
+                System.out.println("Diger federeler bagli; federasyon devam ediyor.");
+            } catch (FederationExecutionDoesNotExist e) {
+                System.out.println("Federasyon zaten kapanmis.");
+            }
+        } finally {
+            rti.disconnect();
         }
-
-        rti.disconnect();
-
-        System.out.println("RTI bağlantisi kesildi!");
     }
 }
